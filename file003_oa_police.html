@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出警记录单 - 鹤山县警务综合平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #ffffff; color: #333333; font-family: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif; overflow-y: auto; line-height: 1.6; }
+        .lang-en .zh { display: none; } .lang-zh .en { display: none; }
+
+        .toolbar { position: sticky; top: 0; width: 100%; height: 54px; background-color: #ffffff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; }
+        .toolbar-title { font-size: 14px; color: #6b7280; font-weight: bold; }
+
+        .document-paper { width: 100%; max-width: 900px; margin: 0 auto; padding: 50px 40px 100px 40px; background-color: #ffffff; }
+        .doc-header { text-align: center; margin-bottom: 30px; }
+        .doc-header h1 { font-size: 26px; color: #1e293b; font-weight: bold; letter-spacing: 2px; margin-bottom: 10px; }
+        .doc-header h2 { font-size: 20px; color: #334155; font-weight: 500; margin-bottom: 15px; }
+        .header-divider { width: 100%; height: 2px; background-color: #e2e8f0; margin-bottom: 25px; }
+
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 15px; }
+        .data-table th, .data-table td { border: 1px solid #cbd5e1; padding: 12px 16px; vertical-align: middle; }
+        .data-table .label-col { background-color: #f8fafc; color: #475569; font-weight: bold; width: 18%; }
+        .data-table .val-col { color: #1e293b; }
+
+        .section-title { font-size: 18px; color: #0f172a; margin: 30px 0 12px 0; font-weight: bold; border-left: 4px solid #3b82f6; padding-left: 10px; line-height: 1.1; }
+        .content-box { font-size: 15px; color: #334155; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 18px; border-radius: 4px; margin-bottom: 20px; }
+        .content-box p { margin-bottom: 8px; } .content-box p:last-child { margin-bottom: 0; }
+        .quote-text { color: #475569; font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 12px; margin: 12px 0; background-color: #ffffff; padding: 12px; }
+        .note-text { color: #64748b; font-size: 14px; margin-top: 10px; }
+        ul, ol { margin-left: 1.5em; margin-bottom: 10px; } li { margin-bottom: 6px; }
+
+        .redacted-text { background-color: #111; color: #111; display: inline-block; padding: 2px 8px; margin-top: 8px; border-radius: 2px; cursor: crosshair; font-family: monospace; transition: color 1s ease-in 1.5s, background-color 1s ease-in 1.5s; }
+        .redacted-text:hover { color: #ef4444; background-color: #fee2e2; }
+
+        .system-note { background-color: #fffbeb; border: 1px dashed #f59e0b; border-left: 4px solid #f59e0b; padding: 18px; margin: 40px 0; border-radius: 4px; }
+        .system-note-title { font-size: 15px; font-weight: bold; color: #d97706; margin-bottom: 10px; }
+
+        .approval-section { margin-top: 50px; }
+        .approval-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 15px; }
+        .approval-table th, .approval-table td { border: 1px solid #cbd5e1; padding: 16px; }
+        .approval-table .header-row { background-color: #f1f5f9; font-weight: bold; color: #334155; }
+        .approval-table .role-row { background-color: #ffffff; color: #64748b; font-size: 14px; }
+        .approval-table .status-row { height: 80px; vertical-align: bottom; padding-bottom: 15px; }
+        .status-name { font-weight: bold; font-size: 15px; margin-bottom: 5px; }
+        .status-blue { color: #0284c7; } .status-green { color: #16a34a; } .status-red { color: #dc2626; }
+        .status-date { font-size: 13px; color: #94a3b8; font-weight: normal; }
+
+        /* Entropy CSS */
+        .entropy-mask { transition: background-color 0.3s ease-in, color 0.3s ease-in; display: inline-block; }
+        .entropy-mask.blacked-out { background-color: #111 !important; color: #111 !important; user-select: none; }
+    </style>
+</head>
+<body class="lang-zh" id="body-container">
+
+    <div class="toolbar">
+        <div class="toolbar-title">
+            <span class="zh">🛡️ 鹤山县警务综合平台 / 电子案卷预览</span>
+            <span class="en">🛡️ Heshan Police Integrated Platform / E-File Preview</span>
+        </div>
+    </div>
+
+    <div class="document-paper">
+        <div class="doc-header">
+            <h1>
+                <span class="zh">鹤山县公安局鹤田派出所</span>
+                <span class="en">Heshan County Public Security Bureau - Hetian Station</span>
+            </h1>
+            <h2>
+                <span class="zh">出警记录</span>
+                <span class="en">Dispatch Record</span>
+            </h2>
+            <div class="header-divider"></div>
+        </div>
+
+        <div class="section-title">
+            <span class="zh">接警信息 (2025)</span>
+            <span class="en">Dispatch Info (2025)</span>
+        </div>
+        <table class="data-table">
+            <tbody>
+                <tr>
+                    <td class="label-col"><span class="zh">接警编号</span><span class="en">Dispatch ID</span></td>
+                    <td class="val-col" colspan="3">HTCJ-20250210-2248</td>
+                </tr>
+                <tr>
+                    <td class="label-col"><span class="zh">接警时间</span><span class="en">Time Received</span></td>
+                    <td class="val-col" width="32%"><span class="zh">2025年2月10日 22时48分</span><span class="en">Feb 10, 2025, 22:48</span></td>
+                    <td class="label-col"><span class="zh">接警方式</span><span class="en">Source</span></td>
+                    <td class="val-col" width="32%"><span class="zh">110指挥中心转警</span><span class="en">110 Command Center Transfer</span></td>
+                </tr>
+                <tr>
+                    <td class="label-col"><span class="zh">报警类别</span><span class="en">Category</span></td>
+                    <td class="val-col" colspan="3"><span class="zh">治安类/疑似盗窃</span><span class="en">Public Security / Suspected Theft</span></td>
+                </tr>
+                <tr>
+                    <td class="label-col"><span class="zh">报警人</span><span class="en">Caller Details</span></td>
+                    <td class="val-col" colspan="3">
+                        <span class="zh">陈勇，男，身份证号：330***********4419，住址：鹤田村东街17号</span>
+                        <span class="en">Chen Yong, Male, ID: 330***********4419, Address: No.17 East Street, Hetian Village</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="section-title">
+            <span class="zh">报警内容摘要</span>
+            <span class="en">Report Summary</span>
+        </div>
+        <div class="content-box">
+            <p>
+                <span class="zh">报警人陈勇来电称：有人从祠堂侧门出来，拿着袋子，跑得很快，"像偷东西的"。</span>
+                <span class="en">Caller Chen Yong reported: Someone came out of the ancestral hall's side door, carrying a bag, running fast, "looked like a thief."</span>
+            </p>
+            <div class="quote-text">
+                <span class="zh"><b>录音转写（节选）：</b><br>"喂，派出所吗？祠堂这边……有人从侧门出来，拿着袋子，跑很快，像偷东西的……你们快来，别让他跑了……对，祠堂，陈祠堂……侧门，刚出来没多久……"</span>
+                <span class="en"><b>Transcript (Excerpt):</b><br>"Hello, police station? Over at the ancestral hall... someone came out the side door, holding a bag, running fast, like they stole something... come quickly, don't let him get away... yes, ancestral hall, Chen's ancestral hall... side door, just came out..."</span>
+            </div>
+            <p class="note-text">
+                <span class="zh">* 注：报警人情绪激动，存在重复陈述。提及"去年也看到过"。</span>
+                <span class="en">* Note: Caller was emotionally agitated and repetitive. Mentioned "seeing it last year".</span>
+            </p>
+        </div>
+
+        <div class="section-title">
+            <span class="zh">处警情况与现场勘查</span>
+            <span class="en">Response & Investigation</span>
+        </div>
+        <div class="content-box">
+            <p><b><span class="zh">现场状况：</span><span class="en">On-site Conditions:</span></b></p>
+            <ol>
+                <li><span class="zh"><b>祠堂主体</b>：正门及两侧偏门均处于关闭状态，门锁完好，无撬动痕迹。</span><span class="en"><b>Main Hall</b>: Main entrance and side doors closed, locks intact, no signs of forced entry.</span></li>
+                <li><span class="zh"><b>财物核查</b>：经与祠堂管理员陈国华共同清点，祠堂内供奉器具、功德箱及存放物品无缺失。</span><span class="en"><b>Property Check</b>: Inventory checked with administrator Chen Guohua; no artifacts, donation boxes missing.</span></li>
+                <li><span class="zh"><b>监控调取</b>：调取祠堂周边治安监控：22:30-23:15时段，未发现人员从侧门出入。</span><span class="en"><b>CCTV footage</b>: Reviewed (22:30-23:15), no persons observed entering/exiting the side door.</span></li>
+            </ol>
+            <br>
+            <p><b><span class="zh">处置结果：</span><span class="en">Resolution:</span></b> <span class="zh">不予立案（无犯罪事实）。现场告知报警人勘查结果，当事人签字确认。</span><span class="en">Not Filed (No criminal facts). Informed caller, caller signed.</span></p>
+        </div>
+
+        <div class="section-title" style="border-left-color: #ef4444;">
+            <span class="zh">历史关联警情 (自动匹配)</span>
+            <span class="en">Historical Associated Records</span>
+        </div>
+        <table class="data-table">
+            <tbody>
+                <tr>
+                    <td class="label-col"><span class="zh">接警时间</span><span class="en">Time Received</span></td>
+                    <td class="val-col"><span class="zh">2024年2月15日</span><span class="en">Feb 15, 2024</span></td>
+                    <td class="label-col"><span class="zh">报警人</span><span class="en">Caller</span></td>
+                    <td class="val-col"><span class="zh">陈勇</span><span class="en">Chen Yong</span></td>
+                </tr>
+                <tr>
+                    <td class="label-col"><span class="zh">简要案情</span><span class="en">Summary</span></td>
+                    <td class="val-col" colspan="3">
+                        <span class="zh">村民陈勇举报北坡夜间存在异常活动，疑似有人影和重物拖拽声。</span>
+                        <span class="en">Caller Chen Yong reported abnormal night activities at North Slope, suspecting shadows and dragging sounds.</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-col"><span class="zh">处置结果</span><span class="en">Resolution</span></td>
+                    <td class="val-col" colspan="3">
+                        <span class="zh">经到场核查无果，未发现违法犯罪事实。</span>
+                        <span class="en">On-site verification yielded no results. No criminal facts found.</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-col"><span class="zh">备注栏</span><span class="en">Remarks</span></td>
+                    <td class="val-col" colspan="3">
+                        <span class="zh">报警人疑似精神紧张，夜间易惊醒。</span>
+                        <span class="en">Caller suspected to be nervous, wakes easily at night.</span>
+                        <br>
+                        
+                        <!-- 矛盾延迟暴露：5次以上阅览才会暴露出周建国死亡的黑档 -->
+                        <span id="police-note-normal" style="color:#64748b;">
+                            <span class="zh">内部意见：建议归档不再处理。该地块无权属争议，按常规流程结案。</span>
+                            <span class="en">INTERNAL: Recommend archiving without further action. Land has no dispute.</span>
+                        </span>
+                        
+                        <span id="police-note-contradiction" class="redacted-text" style="display:none;" title="SYSTEM: DECRYPTING HIDDEN LAYER...">
+                            <span class="zh">内部意见：建议归档不再处理。该地块系周建国(已故,2018)的遗孀所有，避免激化矛盾。</span>
+                            <span class="en">INTERNAL: Recommend archiving without further action. Land belongs to the widow of Zhou Jianguo (Deceased, 2018). Avoid escalating conflict.</span>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="system-note">
+            <div class="system-note-title">
+                <span class="zh">【系统诊断报告】</span>
+                <span class="en">【 SYSTEM DIAGNOSTIC 】</span>
+            </div>
+            <span class="zh">本记录已同步录入公安警务综合平台。结合2024与2025年历史记录，报警人陈勇的重复报警模式与其妻子访谈形成交叉印证，建议后续调查关注其是否存在焦虑或幻听症状，而非排除外部事件可能性。</span>
+            <span class="en">Synced to Integrated Police Platform. Combining 2024 and 2025 records, Chen Yong's repetitive calling pattern cross-references with his wife's interview. Suggest monitoring potential anxiety/auditory hallucinations.</span>
+        </div>
+
+        <div class="approval-section">
+            <table class="approval-table">
+                <tbody>
+                    <tr>
+                        <td colspan="3" class="header-row">
+                            <span class="zh">【文书制作与签章】</span>
+                            <span class="en">Document Signatures</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="role-row" width="33.3%"><span class="zh">记录人</span><span class="en">Recording Officer</span></td>
+                        <td class="role-row" width="33.3%"><span class="zh">审核人 / 校对</span><span class="en">Reviewed By</span></td>
+                        <td class="role-row" width="33.3%"><span class="zh">归档状态</span><span class="en">Archive Status</span></td>
+                    </tr>
+                    <tr>
+                        <td class="status-row">
+                            <div class="status-name status-blue">
+                                <span class="zh">张卫国 (警号：3305**)</span>
+                                <span class="en">Zhang Weiguo (No. 3305**)</span>
+                            </div>
+                            <div class="status-date">2025-02-10 23:45:00</div>
+                        </td>
+                        <td class="status-row">
+                            <div class="status-name status-green">
+                                <span class="zh">李志强 (已审核)</span>
+                                <span class="en">Li Zhiqiang (Checked)</span>
+                            </div>
+                            <div class="status-date">2025-02-10 23:58:00</div>
+                        </td>
+                        <td class="status-row">
+                            <div class="status-name status-red">
+                                <span class="zh">HTGA-2025-XJ-0314</span>
+                                <span class="en">HTGA-2025-XJ-0314</span>
+                            </div>
+                            <div class="status-date">
+                                <span class="zh">*(一式两份，自动电子存档)*</span>
+                                <span class="en">*(Duplicate copy electronically archived)*</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script src="score_system.js"></script>
+    <script>
+        window.applyEntropy = function() {
+            const keywords = ['巡境', '北坡', '排水渠', '黑袋子', '神坛', '陈勇', '周建国'];
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+            const nodesToReplace = [];
+            let node;
+            while (node = walker.nextNode()) {
+                if (node.parentElement && !['SCRIPT','STYLE','TITLE'].includes(node.parentElement.tagName) && !node.parentElement.classList.contains('entropy-mask')) {
+                    nodesToReplace.push(node);
+                }
+            }
+            nodesToReplace.forEach(node => {
+                let text = node.nodeValue;
+                let originalText = text;
+                const tokenMap = {};
+                keywords.forEach(kw => {
+                    let searchCount = parseInt(localStorage.getItem('search_count_' + kw) || '0');
+                    if (searchCount >= 2) {
+                        if (text.includes(kw)) {
+                            let maskText = searchCount === 2 ? kw.slice(0, 1) + '█'.repeat(kw.length - 1) : '█'.repeat(kw.length);
+                            let token = "[@@E-" + Math.random().toString(36).substring(2) + "@@]";
+                            tokenMap[token] = `<span class="entropy-mask" data-mask="${maskText}">${kw}</span>`;
+                            text = text.split(kw).join(token);
+                        }
+                    }
+                });
+                if (text !== originalText) {
+                    Object.keys(tokenMap).forEach(t => { text = text.split(t).join(tokenMap[t]); });
+                    const span = document.createElement('span');
+                    span.innerHTML = text;
+                    node.parentNode.replaceChild(span, node);
+                }
+            });
+            setTimeout(() => { document.querySelectorAll('.entropy-mask:not(.blacked-out)').forEach(el => { el.innerText = el.getAttribute('data-mask'); el.classList.add('blacked-out'); }); }, 300);
+        };
+
+        window.onload = function() {
+            // 【核心修复：恢复微信二次异变的触发标记】
+            localStorage.setItem('viewed_file003', 'true');
+
+            const savedLang = localStorage.getItem('gameLanguage') || 'zh';
+            document.body.className = 'lang-' + savedLang;
+
+            let globalViews = parseInt(localStorage.getItem('global_doc_views') || '0');
+            globalViews++; localStorage.setItem('global_doc_views', globalViews);
+
+            // 机制3：延迟矛盾暴露（5次以上显示周建国死亡记录的涂改痕迹）
+            if (globalViews >= 5) {
+                document.getElementById('police-note-normal').style.display = 'none';
+                document.getElementById('police-note-contradiction').style.display = 'inline-block';
+            }
+            applyEntropy();
+        };
+    </script>
+</body>
+</html>

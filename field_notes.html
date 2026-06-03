@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mac Desktop - 田野笔记</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+            user-select: none;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            /* 模拟 Mac 桌面壁纸深色模糊质感 */
+            background: radial-gradient(circle at 50% 0%, #2b3a55, #121826, #080b12);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 顶部菜单栏 */
+        .mac-menu-bar {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 24px;
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            color: #ddd;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .menu-left { display: flex; gap: 15px; }
+        .menu-left span:first-child { font-weight: 800; font-size: 14px; color: #fff;}
+        .menu-left span:nth-child(2) { font-weight: bold; color: #fff; }
+        .menu-right { display: flex; gap: 15px; }
+
+        /* 窗口通用样式 */
+        .mac-window {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 10px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: absolute;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            color: #ececec;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .title-bar {
+            height: 52px;
+            background: rgba(45, 45, 45, 0.9);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            border-bottom: 1px solid #111;
+        }
+
+        .traffic-lights { display: flex; gap: 8px; width: 70px; }
+        .traffic-lights div { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.2); }
+        .close-btn { background: #ff5f56; }
+        .close-btn:hover { background: #e0443e; }
+        .min-btn { background: #ffbd2e; }
+        .max-btn { background: #27c93f; }
+
+        .toolbar-actions { display: flex; align-items: center; gap: 15px; margin-left: 10px; color: #aaa; font-size: 16px; }
+        .window-title { flex: 1; text-align: center; font-size: 14px; font-weight: bold; color: #dfdfdf; margin-right: 80px; }
+
+        /* ================= Finder (田野笔记) ================= */
+        .finder-window {
+            width: 850px;
+            height: 550px;
+            z-index: 10;
+            top: 60px;
+            left: 100px;
+        }
+
+        .finder-body { display: flex; flex: 1; height: calc(100% - 52px); }
+        
+        .sidebar {
+            width: 160px;
+            background: rgba(40, 40, 40, 0.5);
+            border-right: 1px solid #222;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .sidebar-title { font-size: 11px; color: #888; font-weight: bold; padding: 5px 10px; margin-top: 10px; }
+        .sidebar-item { padding: 6px 10px; border-radius: 5px; font-size: 13px; color: #ccc; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .sidebar-item.active { background: rgba(255, 255, 255, 0.1); color: white; }
+
+        .main-content {
+            flex: 1;
+            background: #1e1e1e;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            grid-auto-rows: 110px;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .file-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .file-icon:hover { background: rgba(255, 255, 255, 0.1); }
+        
+        .icon-img {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .file-name {
+            font-size: 12px;
+            color: #ddd;
+            text-align: center;
+            word-wrap: break-word;
+            width: 100%;
+            line-height: 1.3;
+        }
+
+        /* ================= 文档编辑器 (全局纯白无阴影模式) ================= */
+        .doc-window {
+            width: 800px;
+            height: 650px;
+            z-index: 20;
+            top: 50px;
+            left: 150px;
+            display: none; 
+            background: #ffffff; /* 整个窗口变白 */
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.1) inset;
+        }
+
+        .doc-window .title-bar { 
+            background: #f0f0f0; 
+            border-bottom: 1px solid #dcdcdc; 
+            color: #333;
+        }
+        .doc-window .window-title { color: #333; }
+
+        .doc-body {
+            flex: 1;
+            overflow-y: auto;
+            background: #ffffff; /* 确保滚动区域绝对纯白 */
+            padding: 0;
+        }
+
+        /* 纯白画布，彻底去除边缘灰色和阴影 */
+        .page {
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 50px 60px 80px 60px;
+            background: #ffffff; 
+            box-shadow: none; /* 强制移除阴影 */
+            color: #333;
+            font-family: "SimSun", "Songti SC", "PingFang SC", serif;
+            font-size: 16px;
+            line-height: 1.8;
+            user-select: text; 
+        }
+
+        .page h1 { text-align: center; font-size: 24px; margin-bottom: 20px; font-weight: bold; }
+        .page h2 { font-size: 18px; font-weight: bold; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+        .page p { margin-bottom: 15px; text-align: justify; }
+        .page strong { font-weight: bold; }
+        
+        .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; font-family: "PingFang SC", sans-serif;}
+        .meta-table th, .meta-table td { border: 1px solid #e5e5e5; padding: 10px 14px; text-align: left; }
+        .meta-table th { background: #fafafa; width: 120px; color: #555; font-weight: bold;}
+
+        /* 引言块改为了浅灰色细线，维持白底洁净感 */
+        .quote-block { 
+            border-left: 4px solid #cbd5e1; 
+            padding: 5px 0 5px 15px; 
+            margin: 20px 0; 
+            font-family: "PingFang SC", sans-serif; 
+            font-size: 15px; 
+            color: #475569;
+            background: transparent; /* 背景透明，融入白底 */
+        }
+        .quote-block p { margin-bottom: 10px; }
+        .quote-block p:last-child { margin-bottom: 0; }
+
+        .highlight-blue { color: #2563eb; font-weight: bold; }
+        hr { border: 0; height: 1px; background: #eee; margin: 30px 0; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 顶部菜单栏 -->
+    <div class="mac-menu-bar">
+        <div class="menu-left">
+            <span></span>
+            <span>Finder</span>
+            <span>File</span>
+            <span>Edit</span>
+            <span>View</span>
+            <span>Go</span>
+            <span>Window</span>
+            <span>Help</span>
+        </div>
+        <div class="menu-right">
+            <span>💬</span>
+            <span>🌐</span>
+            <span>🔋 82%</span>
+            <span>Sat Feb 15 16:42</span>
+        </div>
+    </div>
+
+    <!-- Finder 窗口 -->
+    <div class="mac-window finder-window">
+        <div class="title-bar">
+            <div class="traffic-lights">
+                <div class="close-btn"></div>
+                <div class="min-btn"></div>
+                <div class="max-btn"></div>
+            </div>
+            <div class="toolbar-actions">
+                <span>⟨</span> <span>⟩</span>
+                <span style="margin-left: 10px;">≡</span>
+            </div>
+            <div class="window-title">📁 田野笔记</div>
+        </div>
+        <div class="finder-body">
+            <!-- 左侧边栏 -->
+            <div class="sidebar">
+                <div class="sidebar-title">个人收藏</div>
+                <div class="sidebar-item"><span>🏠</span> 桌面</div>
+                <div class="sidebar-item"><span>📄</span> 文稿</div>
+                <div class="sidebar-item"><span>⬇️</span> 下载</div>
+                <div class="sidebar-title">研究资料</div>
+                <div class="sidebar-item"><span>📁</span> 参考文献</div>
+                <div class="sidebar-item"><span>📁</span> 录音转录</div>
+                <div class="sidebar-item active"><span>📁</span> 田野笔记</div>
+            </div>
+
+            <!-- 主文件区 -->
+            <div class="main-content">
+                <!-- 虚构的干扰文件 -->
+                <div class="file-icon" onclick="alert('【系统提示】录音文件已损坏或编码不受支持。')">
+                    <div class="icon-img">🎵</div>
+                    <div class="file-name">录音_老李_0212.m4a</div>
+                </div>
+                <div class="file-icon" onclick="alert('【系统提示】录音文件已损坏或编码不受支持。')">
+                    <div class="icon-img">🎵</div>
+                    <div class="file-name">录音_阿珍_0213.m4a</div>
+                </div>
+                <div class="file-icon" onclick="alert('这是一份前期的文献综述，暂无异常线索。')">
+                    <div class="icon-img">📄</div>
+                    <div class="file-name">文献综述_仪式空间.pdf</div>
+                </div>
+                <div class="file-icon" onclick="alert('这是一些模糊的风景照片，看不清细节。')">
+                    <div class="icon-img">🖼️</div>
+                    <div class="file-name">IMG_4412_广场.jpg</div>
+                </div>
+                
+                <!-- 核心线索文件 (点击打开下方窗口) -->
+                <div class="file-icon" onclick="openDocument()">
+                    <div class="icon-img">📝</div>
+                    <div class="file-name" style="font-weight: bold; color: #60a5fa;">FIELDNOTE-LY-2025-v3.docx</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 文档编辑器窗口 (全新纯白模式) -->
+    <div class="mac-window doc-window" id="docWindow">
+        <div class="title-bar">
+            <div class="traffic-lights">
+                <div class="close-btn" onclick="closeDocument()"></div>
+                <div class="min-btn"></div>
+                <div class="max-btn"></div>
+            </div>
+            <div class="window-title">FIELDNOTE-LY-2025-v3.docx - 已保存</div>
+        </div>
+        <div class="doc-body">
+            <!-- 纯白画布 -->
+            <div class="page">
+                <h1>《鹤田村田野笔记》<br>完整访谈与观察记录</h1>
+                <hr>
+                
+                <h2>【文件元数据】</h2>
+                <table class="meta-table">
+                    <tr><th>文件名</th><td>FIELDNOTE-LY-2025-v3.docx</td></tr>
+                    <tr><th>作者</th><td>林砚</td></tr>
+                    <tr><th>创建时间</th><td>2025年2月13日 21:04</td></tr>
+                    <tr><th>最后修改</th><td>2025年2月14日 02:43</td></tr>
+                    <tr><th>保存位置</th><td>Macintosh HD / Users / LinYan / Research / Fieldnote/</td></tr>
+                    <tr><th>文档状态</th><td>自动保存版本（含修订记录）</td></tr>
+                    <tr><th>导师</th><td>待补充</td></tr>
+                </table>
+
+                <h2>【田野背景】</h2>
+                <p><strong>调查地点：</strong>云鹤省鹤山县鹤田村<br>
+                <strong>进入时间：</strong>2025年2月13日（农历正月十六，巡境活动结束后两日）<br>
+                <strong>天气状况：</strong>阴，气温8℃，微风<br>
+                <strong>调查目的：</strong>记录鹤田村"巡境"民俗仪式的当代实践，重点关注仪式空间变迁与社区记忆<br>
+                <strong>前期准备：</strong>已获取FILE001《1982鹤山县水利志（节录）》、FILE021《鹤田村旧地图（1986）》等档案资料</p>
+
+                <h2>【进入记录】</h2>
+                <p><strong>13:20</strong> 抵达村口。村口无村民活动，仅见一辆工程车辆（车牌模糊，疑似施工队）停靠在北坡方向路口。</p>
+                <p><strong>13:35</strong> 沿主街步行至祠堂区域。祠堂门锁闭，门前广场残留鞭炮碎屑及临时搭建痕迹（与FILE002所述"正月十四巡境"时间吻合）。</p>
+                <p><strong>13:50</strong> 在祠堂东侧小卖部尝试接触村民。店主为老年男性，对"巡境"话题回应极为简短："年年都有，没什么好看的。"问及是否可以采访，对方摆手拒绝。</p>
+
+                <h2>【访谈一：阿珍】</h2>
+                <p><strong>访谈时间：</strong>14:15—14:52<br>
+                <strong>访谈地点：</strong>东街阿珍家门口（门前堆放建材，疑似近期修缮）<br>
+                <strong>受访者：</strong>阿珍，女，约40岁，鹤田村本村人，经营小卖部（与祠堂东侧小卖部非同一家）<br>
+                <strong>记录方式：</strong>现场手写+手机录音（录音文件名待整理）<br>
+                <strong>访谈者：</strong>林砚</p>
+                
+                <h2>【访谈正文】</h2>
+                <p><strong>林砚：</strong>阿珍姐，打扰了。我是来做巡境调查的，想跟您聊聊今年正月十四的活动。</p>
+                <p><strong>阿珍：</strong>（停顿，打量）你是记者？</p>
+                <p><strong>林砚：</strong>不是，我是学生，写论文的。</p>
+                <p><strong>阿珍：</strong>（放松些许）哦，学生啊。今年巡境……（看向祠堂方向）挺热闹的，人多。</p>
+                <p><strong>林砚：</strong>您去看了吗？</p>
+                <p><strong>阿珍：</strong>没凑近看，就在门口站了站。路线跟以前不一样了，走到北坡那边去了。</p>
+                <p><strong>林砚：</strong>北坡？我查到的旧地图上有排水渠，现在还有吗？</p>
+                <p><strong>阿珍：</strong>排水渠？（笑）你们年轻人不知道。神坛就在北坡那边。</p>
+                <p><strong>林砚：</strong>神坛？是临时搭的那个吗？</p>
+                <p><strong>阿珍：</strong>（突然压低声音）最近路线和以前不同，你知道吧？</p>
+                <p><strong>林砚：</strong>知道，审批表上写了，因为施工临时调整的。</p>
+                <p><strong>阿珍：</strong>（未回应，看向林砚身后）</p>
+                <p><strong>林砚：</strong>阿珍姐？</p>
+                <p><strong>阿珍：</strong>（转回视线）你真的是学生？不是记者？</p>
+                <p><strong>林砚：</strong>真的，这是我的学生证。（出示证件）</p>
+                <p><strong>阿珍：</strong>（未查看证件）……以前不往北坡走的。北坡那边……（停顿）你问别人吧。</p>
+                <p><strong>林砚：</strong>北坡那边怎么了？</p>
+                <p><strong>阿珍：</strong>（起身，整理门口建材）我要忙了。你问陈阿婆去，她老，知道得多。</p>
+
+                <h2>【访谈中断说明】</h2>
+                <p>阿珍以"要进货"为由结束对话，全程未回答"路线变化原因"的直接提问。受访者对"记者"身份的敏感度异常，且主动提及"北坡"与"神坛"的关联。</p>
+
+                <h2>【现场观察补充】</h2>
+                <p><strong>14:55</strong> 离开阿珍家后，沿东街向北坡方向步行。</p>
+                <p><strong>15:10</strong> 抵达北坡区域。可见施工围挡，围挡外侧空地有焚烧痕迹及残留红布碎片，应为临时神坛拆除后遗存。</p>
+                <p><strong>15:25</strong> 尝试寻找排水渠遗址。根据资料描述"北侧山坡下缘"及地图标注，应在当前位置偏东约30米处。但现场均为硬化路面及施工堆积土，无任何渠道痕迹。</p>
+                <p><strong>15:40</strong> 使用手机拍摄现场照片（文件名待整理）。</p>
+
+                <h2>【个人记录】（原始笔记誊录）</h2>
+                <div class="quote-block">
+                    <p>> 北坡出现频率异常高。</p>
+                    <p>> 阿珍、审批表、档案、地图——所有材料都指向北坡，但每个来源的"北坡"似乎不是同一个地方。</p>
+                    <p>> 需要继续确认：<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;- "北坡"作为地名是否存在漂移？<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;- 排水渠的精确位置（档案与地图偏差30米）<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;- 神坛与北坡的绑定关系是何时建立的？</p>
+                    <p>> 地图资料可能存在遗漏。1986年地图与1982年档案的坐标不一致，是比例误差还是后期改造？</p>
+                    <p>> 排水渠附近值得重点调查。但"附近"是哪里？</p>
+                </div>
+                
+                <h2>【修订记录】（系统自动保存痕迹）</h2>
+                <p><strong>02:43 修改记录：</strong></p>
+                <table class="meta-table">
+                    <tr><th>修改前</th><th>修改后</th></tr>
+                    <tr><td>"神坛位置待确认"</td><td>"神坛就在北坡"</td></tr>
+                </table>
+                <p><em>*注：该修改为回退操作。原始记录为阿珍原话"神坛就在北坡那边"，首次整理时误写为"神坛位置待确认"，深夜校对时发现错误并修正。修正时间02:43与语音发送时间（02:38）接近，但无直接关联。</em></p>
+
+                <h2>【待办事项】</h2>
+                <p>1. 整理阿珍访谈录音，核对"神坛就在北坡"的确切表述<br>
+                2. 预约陈阿婆访谈<br>
+                3. 申请查阅鹤田村道路改造施工图纸（工程编号HT-2024-RD-07）<br>
+                4. 对比照片EXIF时间与本次入村时间<br>
+                5. 向导师汇报初步发现，确认"北坡"是否属于研究预设偏差</p>
+
+                <h2>【关联档案索引】</h2>
+                <table class="meta-table">
+                    <tr><th>档案编号</th><th>关联点</th><th>状态</th></tr>
+                    <tr><td>FILE001</td><td>排水渠位置描述</td><td>已获取</td></tr>
+                    <tr><td>FILE002</td><td>北坡临时祭点审批</td><td>已获取</td></tr>
+                    <tr><td>FILE004</td><td>神坛搭建记录</td><td>已获取</td></tr>
+                    <tr><td>FILE008</td><td>微信群"哪有排水渠"</td><td>已获取</td></tr>
+                    <tr><td>FILE009</td><td>陈阿婆访谈（记忆矛盾）</td><td>待预约</td></tr>
+                    <tr><td>FILE021</td><td>1986年地图坐标</td><td>已获取</td></tr>
+                    <tr><td>FILE023</td><td>GPS轨迹偏移（北坡外侧树林）</td><td>待核实</td></tr>
+                </table>
+
+                <h2>【研究者反思】</h2>
+                <p>本次入村前已阅读大量档案，形成"北坡是核心调查区域"的先验判断。阿珍的回避反应可能强化了这一判断，但是否属于"确认偏误"尚需警惕。导师提及的"先有答案再找证据"的风险，在本次访谈中已有所体现——我是否在引导受访者提及北坡？</p>
+
+                <h2>【签章】</h2>
+                <p><strong>记录人：</strong>林砚<br>
+                <strong>日期：</strong>2025年2月14日</p>
+                <hr>
+                <p style="text-align: center; color: #999; font-size: 13px;"><em>（本记录为田野调查原始材料，未经脱敏处理，仅供学术研究使用）</em></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openDocument() {
+            const docWindow = document.getElementById('docWindow');
+            docWindow.style.display = 'flex';
+            docWindow.style.animation = 'none';
+            docWindow.offsetHeight; 
+            docWindow.style.animation = null; 
+        }
+
+        function closeDocument() {
+            document.getElementById('docWindow').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
